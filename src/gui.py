@@ -10,7 +10,7 @@ class BulkRenameApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Bulk Rename Images")
-        self.root.geometry("700x680")
+        self.root.geometry("700x730")
         self.style = Style()
         self.style.configure("TLabel", font=("Poppins", 12), background="#f0f0f0")
         self.style.configure(
@@ -89,14 +89,31 @@ class BulkRenameApp:
             row=0, column=0, padx=10, pady=5, sticky="w"
         )
         self.format_combobox = Combobox(
-            format_frame, values=["jpg", "png", "webp", "jpeg"]
+            format_frame, values=["jpg", "png", "webp", "jpeg"], state="readonly"
         )
         self.format_combobox.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
         self.format_combobox.current(0)
 
+        # Rename convention
+        rename_convention_frame = Frame(self.root, padding="10", style="TFrame")
+        rename_convention_frame.grid(row=6, column=0, columnspan=3, pady=5, sticky="ew")
+        rename_convention_frame.columnconfigure(0, weight=1)
+        tk.Label(
+            rename_convention_frame, text="Rename Convention:", background="#f0f0f0"
+        ).grid(row=0, column=0, padx=10, pady=5, sticky="w")
+        self.rename_convention_combobox = Combobox(
+            rename_convention_frame,
+            values=["main_name_index", "index_main_name"],
+            state="readonly",
+        )
+        self.rename_convention_combobox.grid(
+            row=0, column=1, padx=10, pady=5, sticky="ew"
+        )
+        self.rename_convention_combobox.current(0)
+
         # Progress bar
         progress_frame = Frame(self.root, padding="10", style="TFrame")
-        progress_frame.grid(row=6, column=0, columnspan=3, pady=20, sticky="ew")
+        progress_frame.grid(row=7, column=0, columnspan=3, pady=20, sticky="ew")
         self.progress_bar = Progressbar(
             progress_frame, orient=tk.HORIZONTAL, length=600, mode="determinate"
         )
@@ -104,7 +121,7 @@ class BulkRenameApp:
 
         # Status label
         status_frame = Frame(self.root, padding="10", style="TFrame")
-        status_frame.grid(row=7, column=0, columnspan=3, pady=5, sticky="ew")
+        status_frame.grid(row=8, column=0, columnspan=3, pady=5, sticky="ew")
         self.status_label = tk.Label(
             status_frame, text="", font=("Poppins", 10), background="#f0f0f0"
         )
@@ -112,7 +129,7 @@ class BulkRenameApp:
 
         # Start button
         start_button_frame = Frame(self.root, padding="10", style="TFrame")
-        start_button_frame.grid(row=8, column=0, columnspan=3, pady=20, sticky="ew")
+        start_button_frame.grid(row=9, column=0, columnspan=3, pady=20, sticky="ew")
         Button(start_button_frame, text="Start", command=self.start_bulk_rename).pack()
 
     def browse_folder(self, entry):
@@ -126,6 +143,7 @@ class BulkRenameApp:
         main_name = self.main_name_entry.get()
         start_number = self.start_number_entry.get()
         target_format = self.format_combobox.get()
+        rename_convention = self.rename_convention_combobox.get()
 
         # Validate inputs
         if (
@@ -134,6 +152,7 @@ class BulkRenameApp:
             or not main_name
             or not start_number
             or not target_format
+            or not rename_convention
         ):
             messagebox.showerror("Error", "All fields are required.")
             return
@@ -160,6 +179,7 @@ class BulkRenameApp:
                     main_name,
                     start_number,
                     target_format,
+                    rename_convention,
                     progress_callback,
                 )
                 messagebox.showinfo(

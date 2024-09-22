@@ -9,6 +9,7 @@ def bulk_rename_images(
     main_name,
     start_number,
     target_format,
+    rename_convention,
     progress_callback=None,
 ):
     create_destination_folder(destination_folder)
@@ -22,6 +23,7 @@ def bulk_rename_images(
             main_name,
             start_number + index,
             target_format,
+            rename_convention,
         )
         if progress_callback:
             progress_callback(index + 1, total_files)
@@ -44,15 +46,30 @@ def list_files(source_folder):
 
 
 def rename_and_copy_file(
-    file_name, source_folder, destination_folder, main_name, new_index, target_format
+    file_name,
+    source_folder,
+    destination_folder,
+    main_name,
+    new_index,
+    target_format,
+    rename_convention,
 ):
-    new_name = f"{main_name}{new_index:05d}.{target_format}"
+    if rename_convention == "main_name_index":
+        new_name = f"{main_name}{new_index:05d}.{target_format}"
+    elif rename_convention == "index_main_name":
+        new_name = f"{new_index:05d}_{main_name}.{target_format}"
+    else:
+        new_name = f"{main_name}{new_index:05d}.{target_format}"  # Default convention
+
     source_path = os.path.join(source_folder, file_name)
     destination_path = os.path.join(destination_folder, new_name)
 
-    # Check if the file is already in the target format
-    if file_name.lower().endswith(f".{target_format}"):
-        shutil.copy(source_path, destination_path)
-    else:
-        with Image.open(source_path) as img:
-            img.convert("RGB").save(destination_path, target_format.upper())
+    try:
+        # Check if the file is already in the target format
+        if file_name.lower().endswith(f".{target_format}"):
+            shutil.copy(source_path, destination_path)
+        else:
+            with Image.open(source_path) as img:
+                img.convert("RGB").save(destination_path, target_format.upper())
+    except Exception as e:
+        print(f"Error processing file {file_name}: {e}")
